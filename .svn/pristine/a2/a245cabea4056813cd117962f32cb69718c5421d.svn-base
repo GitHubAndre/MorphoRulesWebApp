@@ -1,0 +1,38 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 12-set-2014, 14.36.45
+    Author     : andrea
+*/
+
+body {
+    font: 10pt sans;
+}
+#mynetwork {
+    width: 1200px;
+    height: 600px;
+    border: 1px solid lightgray;
+    background: #F3F3F3;
+}
+table.legend_table {
+    font-size: 11px;
+    border-width:1px;
+    border-color:#d3d3d3;
+    border-style:solid;
+}
+table.legend_table,td {
+    border-width:1px;
+    border-color:#d3d3d3;
+    border-style:solid;
+    padding: 2px;
+}
+div.table_content {
+    width:80px;
+    text-align:center;
+}
+div.table_description {
+    width:100px;
+}

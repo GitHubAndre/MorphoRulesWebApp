@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="content">
+            <!--            <h:outputScript library="js" name="generaGrafo.js" />-->
+            <h:outputScript library="js" name="vis.js" />
+            <style type="text/css">
+                body {
+                    font: 10pt sans;
+                }
+                #mynetwork {
+                    width: 1200px;
+                    height: 600px;
+                    border: 1px solid lightgray;
+                    background: #F3F3F3;
+                }
+                table.legend_table {
+                    font-size: 11px;
+                    border-width:1px;
+                    border-color:#d3d3d3;
+                    border-style:solid;
+                }
+                table.legend_table,td {
+                    border-width:1px;
+                    border-color:#d3d3d3;
+                    border-style:solid;
+                    padding: 2px;
+                }
+                div.table_content {
+                    width:80px;
+                    text-align:center;
+                }
+                div.table_description {
+                    width:100px;
+                }
+            </style>
+            <script type="text/javascript">
+
+                function draw() {
+                    var nodes = null;
+                    var edges = null;
+                    var network = null;
+                    // create nodes
+                    nodes = [{id: 1, label: 'THE_INFINITE', color: 'red'},
+                        {id: 2, label: 'nodo_1'},
+                        {id: 3, label: 'node_2'},
+                        {id: 4, label: 'node_3'},
+                        {id: 5, label: 'node_4'}];
+                    // create edges
+                    edges = [{from: 1, to: 2, label: 'rel_1'},
+                        {from: 1, to: 3, label: 'rel_2'},
+                        {from: 3, to: 2, label: 'rel_3'},
+                        {from: 4, to: 4, label: 'rel_4'},
+                        {from: 2, to: 5, label: 'rel_5'}];
+                    // specify options
+                    options = {
+                        navigation: true,
+                        stabilize: false,
+                        edges: {
+                            width: 2,
+                            style: 'arrow',
+                            color: 'gray'
+                        },
+                        nodes: {
+                            // default for all nodes
+                            fontFace: 'times',
+                            shape: 'box',
+                            color: {
+                                border: 'orange',
+                                background: 'yellow',
+                                highlight: {
+                                    border: 'darkorange',
+                                    background: 'gold'
+                                }
+                            }
+                        },
+                        physics: {barnesHut: {springLength: 200}} // this is the correct way to set the length of the springs
+                    };
+                    // create the network
+                    var container = document.getElementById('mynetwork');
+                    var data = {
+                        nodes: nodes,
+                        edges: edges
+                    };
+                    network = new vis.Network(container, data, options);
+                }
+
+            </script>
+            <h:form>
+                <p:commandButton value="Genera" onclick="draw()"></p:commandButton>
+            </h:form>
+            <div id='mynetwork'></div>
+        </ui:define>
+    </ui:composition>
+
+</html>

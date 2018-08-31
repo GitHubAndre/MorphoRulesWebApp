@@ -1,0 +1,61 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:form id="dataInputForm">
+
+        <p:outputPanel style="padding-top: 20px; font-size: large; font-weight: bold; text-align: center;">
+            Insert an Italian lemma
+        </p:outputPanel>
+        <h:panelGrid columns="5" style="margin-bottom:10px; padding-top: 50px;" cellpadding="5">
+            <p:outputLabel value="Word" style="padding-left: 10px; font-weight: bold;"/>
+            <p:inputText value="#{dataInputController.word}" style="width: 120px;">
+                <p:ajax event="keyup" update="searchButton"/>
+            </p:inputText>
+            <p:selectOneListbox id="pos" value="#{dataInputController.pos}" style="width: 80px;">
+                <f:selectItem itemLabel="noun" itemValue="noun" />
+                <f:selectItem itemLabel="verb" itemValue="verb" />
+                <f:selectItem itemLabel="adjective" itemValue="adjective" />
+                <p:ajax update="searchButton"/>
+            </p:selectOneListbox>
+            <p:commandButton id="searchButton" value="Search" title="Search for morphlogical class" onstart="PF('loadingDialog').show()" oncomplete="PF('loadingDialog').hide()" 
+                             update="neologismForm :dataOutputForm" action="#{dataInputController.morphoClassSearcher}" 
+                             disabled="#{dataInputController.pos.equals('') or dataInputController.word.equals('')}"/>
+        </h:panelGrid>
+
+        <p:spacer height="2%"/>
+
+        <h:panelGroup id="neologismForm">
+            <p:panelGrid columns="1" rendered="#{dataInputController.classList.size() > 0}">
+                <p:row>
+                    <p:column colspan="2">
+                        <p:outputLabel escape="false" value="#{dataInputController.classSearchResultLabel}"/>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
+            <h:panelGrid columns="2" style="margin-bottom:10px; padding-left: 30px;" cellpadding="5" cellspacing="5" rendered="#{dataInputController.classList.size() > 0}">
+                <p:selectOneListbox value="#{dataInputController.selectedMorphoClass}" var="sc" >
+                    <p:ajax update="generateButton classDescription"/>
+                    <f:selectItems value="#{dataInputController.classList}" var="c" itemLabel="#{c}" itemValue="#{c}"/>
+                    <p:column>
+                        <h:outputText value="#{sc}" />
+                    </p:column>
+                </p:selectOneListbox>
+                <p:outputPanel id="classDescription">
+                    <h:outputText value="#{dataInputController.morphoClassDescription}" rendered="#{dataInputController.isNeologism}"/>
+                </p:outputPanel>
+                <h:panelGrid id="generateButton" columns="2">
+                    <p:commandButton value="Generate" title="Generate the forms" onstart="PF('loadingDialog').show()" oncomplete="PF('loadingDialog').hide()" 
+                                     update=":dataOutputForm" action="#{dataInputController.generateForms()}" disabled="#{dataInputController.selectedMorphoClass.equals('')}"/>
+                    <p:commandButton value="Reset" title="Reset entry" onstart="PF('loadingDialog').show()" oncomplete="PF('loadingDialog').hide()" 
+                                     update="dataInputForm :dataOutputForm" action="#{dataInputController.reset(false)}"/>
+                </h:panelGrid>
+
+            </h:panelGrid>
+        </h:panelGroup>
+
+    </h:form>
+
+</ui:composition>

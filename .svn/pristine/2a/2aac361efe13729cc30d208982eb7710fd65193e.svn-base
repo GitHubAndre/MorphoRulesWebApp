@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="content">
+            <p:scrollPanel id="basic" style="height:480px" mode="native">
+                <br />
+                <h:form styleClass="colHeader" id="Domanda_1">
+                    <p:fieldset styleClass="ui-fieldset-legend"
+                                legend="Question about semantic relations and properties"
+                                toggleable="true" toggleSpeed="500" collapsed="true">
+                        <br />
+                        <br />
+                        What are the 
+                        <p:selectOneMenu styleClass="menu" panelStyleClass="panel"
+                                         value="#{plotinoQuestions.query_1_param_1}"
+                                         valueChangeListener="#{plotinoQuestions.query_1_propertyChanged}">
+                            <p:ajax listener="#{plotinoQuestions.q_1_p_1Changed}" update="q1_p2" />
+                            <f:selectItem itemValue="ObjectProperty"
+                                          itemLabel="semantic relations" />
+                            <f:selectItem itemValue="DatatypeProperty"
+                                          itemLabel="properties" />
+                        </p:selectOneMenu> the term <p:selectOneMenu styleClass="menu" value="#{plotinoQuestions.query_1_param_2}" id="q1_p2" filter="true" filterMatchMode="startsWith" effect="fade">
+                            <f:selectItems value="#{plotinoQuestions.instances}" var="c"
+                                           itemLabel="#{c}" itemValue="#{c}" />
+                        </p:selectOneMenu> is related to ? 
+                        <p:commandButton value="Ask" icon="ui-icon-search"
+                                         update=":risposte" onstart="blockUI.show()"
+                                         oncomplete="blockUI.hide()"
+                                         actionListener="#{plotinoQuestions.runQuestion_1()}"
+                                         styleClass="toolButtonRight">
+                        </p:commandButton>
+                        <br />
+                        <br />
+                    </p:fieldset>
+                </h:form>
+
+
+                <br />
+                <h:form styleClass="colHeader" id="Domanda_2">
+                    <p:fieldset styleClass="ui-fieldset-legend"
+                                legend="Question about semantic relations among terms"
+                                toggleable="true" toggleSpeed="500" collapsed="true">
+                        <br />
+                        <br />
+                        What are the semantic relations among 
+                        <p:selectOneMenu styleClass="menu" value="#{plotinoQuestions.query_2_param_1}" id="q2_p1" filter="true" filterMatchMode="startsWith" effect="fade">
+                            <f:selectItems value="#{plotinoQuestions.instances}" var="a"
+                                           itemLabel="#{a}" itemValue="#{a}" />
+                        </p:selectOneMenu> ,
+                        <p:selectOneMenu styleClass="menu" value="#{plotinoQuestions.query_2_param_2}" id="q2_p2" filter="true" filterMatchMode="startsWith" effect="fade">
+                            <f:selectItems value="#{plotinoQuestions.instances}" var="b"
+                                           itemLabel="#{b}" itemValue="#{b}" />
+                        </p:selectOneMenu> and 
+                        <p:selectOneMenu styleClass="menu" value="#{plotinoQuestions.query_2_param_3}" id="q2_p3" filter="true" filterMatchMode="startsWith" effect="fade">
+                            <f:selectItems value="#{plotinoQuestions.instances}" var="d"
+                                           itemLabel="#{d}" itemValue="#{d}" />
+                        </p:selectOneMenu>
+
+                        <p:commandButton value="Ask" icon="ui-icon-search"
+                                         update=":risposte" onstart="blockUI.show()"
+                                         oncomplete="blockUI.hide()"
+                                         actionListener="#{plotinoQuestions.runQuestion_2()}"
+                                         styleClass="toolButtonRight">
+                        </p:commandButton>
+                        <br />
+                        <br />
+                    </p:fieldset>
+                </h:form>
+
+
+
+
+                <br />
+                <h:form styleClass="colHeader" id="Domanda_3">
+                    <p:growl id="growl" showDetail="true" sticky="false" life="8000" />
+                    <p:fieldset styleClass="ui-fieldset-legend"
+                                legend="Question about terms"
+                                toggleable="true" toggleSpeed="500" collapsed="true">
+                        <br />
+                        <br />
+                        What are the terms related to <p:selectOneMenu
+                            styleClass="menu" value="#{plotinoQuestions.query_3_param_1}"
+                            valueChangeListener="#{plotinoQuestions.query_3_instanceChanged}"
+                            filter="true" filterMatchMode="startsWith" effect="fade">
+                            <p:ajax listener="#{plotinoQuestions.q_3_p_1Changed}" update="q3p2" />
+                            <f:selectItems value="#{plotinoQuestions.instances}" var="i"
+                                           itemLabel="#{i}" itemValue="#{i}" />
+                        </p:selectOneMenu> by the relation <p:selectOneMenu styleClass="menu"
+                                                                            value="#{plotinoQuestions.query_3_param_2}" id="q3p2">
+                            <f:selectItems value="#{plotinoQuestions.objRelations}" var="r"
+                                           itemLabel="#{r}" itemValue="#{r}" />
+                        </p:selectOneMenu> ? 
+                        <p:commandButton value="Ask" icon="ui-icon-search"
+                                         update=":risposte, growl" onstart="blockUI.show()"
+                                         oncomplete="blockUI.hide()"
+                                         actionListener="#{plotinoQuestions.runQuestion_3()}"
+                                         styleClass="toolButtonRight">
+                        </p:commandButton>
+                        <br />
+                        <br />
+                    </p:fieldset>
+                </h:form>
+                <br />
+                <br />
+                <br />
+            </p:scrollPanel>
+            <br />
+            <center>
+                <h:form id="risposte">
+                    <p:tabView styleClass="tabHeader" id="tabView">
+                        <p:tab title="Results"
+                               closable="true">
+                            <p:dataTable styleClass="colHeader" var="res"
+                                         value="#{plotinoQuestions.results}" style="width:80%" paginator="true"
+                                         rows="5" rowsPerPageTemplate="5, 10, 50, 100, 500"
+                                         paginatorTemplate=" {CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                         rendered="#{plotinoQuestions.results.size() != 0}" widgetVar="carsTable">
+                                <p:columns styleClass="colHeader" value="#{plotinoQuestions.columns}"
+                                           var="column" columnIndexVar="colIndex"
+                                           sortBy="#{res[column.property]}">
+                                    <f:facet name="header">  
+                                        #{column.header}  
+                                    </f:facet>    
+                                    #{res[column.property]}  
+                                </p:columns>
+                            </p:dataTable>
+                        </p:tab>
+                    </p:tabView>
+                </h:form>
+            </center>
+            <br />
+            <br />
+            <h:form>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

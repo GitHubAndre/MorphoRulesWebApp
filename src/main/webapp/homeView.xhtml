@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <ui:composition template="/template.xhtml">
+        <ui:define name="content">
+
+            <p:layout fullPage="true">
+                <p:layoutUnit styleClass="layoutUnit_banner" position="north" size="80"> 
+                    <p:graphicImage id="LSJHeader" styleClass="banner" name="image/bannerTitle.png" height="70"/>
+                </p:layoutUnit>
+
+                <p:layoutUnit styleClass="layoutUnit" position="west" size="40%">
+                    <ui:include src="/DataInputView.xhtml"/>
+                </p:layoutUnit>
+                <p:layoutUnit styleClass="layoutUnit" position="center" size="60%">
+                    <ui:include src="/DataOutputView.xhtml"/>
+                </p:layoutUnit>
+
+                <p:layoutUnit styleClass="layoutUnit_banner" position="south" size="50">
+                    <div style="font-size: 14px; text-align: center; width: 100%">
+                        <p>Developed by
+                            <a style="color: blue" href="http://licolab.ilc.cnr.it/" target="blank">Literary Computing Group</a>
+                            and 
+                            <a style="color: blue" href="http://lari.ilc.cnr.it/en/" target="blank">Language Resources and Infrastructures Research Group</a>
+                        </p>
+                        <!--<b>Disclaimer:</b> In the current version of the dataset, for technical reasons we have only encoded rules for the most regular classes of Verbs/Nouns/Adjectives. Although this gives us a high level of coverage (>90%), it means that words with an irregular morphology are not included amongst which are very frequent verbs like 'essere', 'vedere'. In future versions all of these will be included.-->
+                    </div>
+                </p:layoutUnit>
+
+            </p:layout>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

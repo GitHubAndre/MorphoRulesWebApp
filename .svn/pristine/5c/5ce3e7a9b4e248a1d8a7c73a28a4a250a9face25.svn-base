@@ -1,0 +1,15 @@
+.ui-datatable table {
+    table-layout: auto !important;
+}
+
+.ui-layout-unit .ui-layout-unit-content {
+    padding: 0 !important;
+}
+
+.ui-datalist-content {
+    border: 0 !important;
+}
+
+.ui-datalist-data {
+    margin: 0 !important;
+}

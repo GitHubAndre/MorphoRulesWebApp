@@ -1,0 +1,476 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package it.cnr.ilc.plotino.action;
+
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import it.cnr.ilc.plotino.model.OntoResult;
+import it.cnr.ilc.plotino.model.plotinoModel;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.faces.event.AjaxBehaviorEvent;
+import javax.faces.event.ValueChangeEvent;
+import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+/**
+ *
+ * @author andrea
+ */
+@Named
+@ViewScoped
+public class plotinoQuestions implements Serializable {
+
+    @PostConstruct
+    private void loadPlotinoModel() {
+        try {
+            initializeQuestion_1();
+            initializeQuestion_3();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static public class ColumnModel implements Serializable {
+
+        private String header;
+        private String property;
+
+        public ColumnModel(String header, String property) {
+            this.header = header;
+            this.property = property;
+        }
+
+        public String getHeader() {
+            return header;
+        }
+
+        public String getProperty() {
+            return property;
+        }
+    }
+
+    public List<ColumnModel> getColumns() {
+        return columns;
+    }
+
+    public void createDynamicColumns(String template) {
+        String[] columnKeys = template.split(" ");
+        columns.clear();
+        for (String columnKey : columnKeys) {
+            String key = columnKey.trim();
+            if (VALID_COLUMN_KEYS.contains(key)) {
+                columns.add(new ColumnModel(getColumnTitle(columnKey),
+                        columnKey));
+            }
+        }
+    }
+
+    private String getColumnTitle(String col) {
+        if (col.equals("termine")) {
+            return "SOURCE TERM";
+        } else if (col.equals("classe")) {
+            return "TYPE ONTOLOGIQUE";
+        } else if (col.equals("inferita")) {
+            return "INFERRED";
+        } else if (col.equals("relazione")) {
+            return "RELATION";
+        } else if (col.equals("termine_target")) {
+            return "TARGET TERM";
+        } else if (col.equals("classe_target")) {
+            return "TYPE ONTOLOGIQUE";
+        } else if (col.equals("tratto")) {
+            return "PROPERTY";
+        } else {
+            return "VALUE";
+        }
+    }
+
+    @Inject
+    private transient plotinoModel plotinoModel;
+
+    private final String NAMESPACES = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> "
+            + "PREFIX plotino: <http://www.semanticweb.org/ontologies/2014/4/8/Plotino1.owl#> "
+            + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
+            + "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
+    private static final String plotinoNS = "http://www.semanticweb.org/ontologies/2014/4/8/Plotino1.owl#";
+    private String query_1_param_1 = "ObjectProperty";
+    private String query_1_param_2 = "";
+    private String query_3_param_1 = "Being";
+    private String query_3_param_2 = "";
+    private static Map<String, String> instanceMap = new LinkedHashMap<String, String>();
+    private static Map<String, String> instance_2Map = new LinkedHashMap<String, String>();
+    private static Map<String, String> objRelationMap = new LinkedHashMap<String, String>();
+    private List<ColumnModel> columns = new ArrayList<ColumnModel>();
+    private final static List<String> VALID_COLUMN_KEYS = Arrays.asList(
+            "termine", "relazione", "tratto", "classe", "valore",
+            "classe_target", "termine_target", "inferita");
+    private String columnTemplate_1_relazione = "termine relazione termine_target inferita";
+    // private String columnTemplate_1_relazione =
+    // "relazione termine classe tipo";
+    private String columnTemplate_1_tratto = "relazione termine_target inferita";
+    private String columnTemplate_2 = "termine classe inferita";
+    // private String columnTemplate_3 = "termine classe tipo";
+    private String columnTemplate_3 = "termine relazione termine_target inferita";
+    private String columnTemplate_4 = "termine classe inferita";
+    private static List<OntoResult> res = new ArrayList<OntoResult>();
+    private static List<OntoResult> clearRes = new ArrayList<OntoResult>();
+
+    public void initializeQuestion_1() throws IOException {
+        String queryString = null;
+        String inst = null;
+        instanceMap.clear();
+        queryString = NAMESPACES
+                + "SELECT ?termine "
+                + "WHERE { ?termine a owl:Thing . ?termine ?property ?value . ?property rdf:type owl:"
+                + query_1_param_1 + " . } " + "ORDER BY ?termine";
+        Query query = QueryFactory.create(queryString);
+        QueryExecution qe = QueryExecutionFactory.create(query, plotinoModel.getModel());
+        for (ResultSet rs = qe.execSelect(); rs.hasNext();) {
+            QuerySolution binding = rs.nextSolution();
+            inst = binding.get("termine").toString().split("#")[1];
+            instanceMap.put(inst, inst);
+        }
+        qe.close();
+    }
+
+    public void initializeQuestion_3() throws IOException {
+        String queryString = null;
+        String elem = null;
+        objRelationMap.clear();
+        instance_2Map.clear();
+        queryString = NAMESPACES
+                + "SELECT ?termine "
+                + "WHERE { ?termine a owl:Thing . } "
+                + "ORDER BY ?termine";
+        Query query = QueryFactory.create(queryString);
+        QueryExecution qe = QueryExecutionFactory.create(query, plotinoModel.getModel());
+        for (ResultSet rs = qe.execSelect(); rs.hasNext();) {
+            QuerySolution binding = rs.nextSolution();
+            elem = binding.get("termine").toString().split("#")[1];
+            instance_2Map.put(elem, elem);
+        }
+        queryString = NAMESPACES
+                + "SELECT DISTINCT ?property "
+                + "WHERE { "
+                + "{ plotino:"
+                + query_3_param_1
+                + " ?property ?v1 . ?property rdf:type owl:ObjectProperty . } "
+                + "UNION "
+                + "{ ?v2 ?property plotino:"
+                + query_3_param_1
+                + " . ?property rdf:type owl:ObjectProperty . } "
+                + "} "
+                + "ORDER BY ?property";
+        query = QueryFactory.create(queryString);
+        qe = QueryExecutionFactory.create(query, plotinoModel.getModel());
+        for (ResultSet rs = qe.execSelect(); rs.hasNext();) {
+            QuerySolution binding = rs.nextSolution();
+            elem = binding.get("property").toString().split("#")[1];
+            objRelationMap.put(elem, elem);
+        }
+        qe.close();
+    }
+
+    public String getQuery_1_param_1() {
+        return query_1_param_1;
+    }
+
+    public void setQuery_1_param_1(String query_1_param_1) {
+        this.query_1_param_1 = query_1_param_1;
+    }
+
+    public String getQuery_1_param_2() {
+        return query_1_param_2;
+    }
+
+    public void setQuery_1_param_2(String query_1_param_2) {
+        this.query_1_param_2 = query_1_param_2;
+    }
+
+    public String getQuery_3_param_1() {
+        return query_3_param_1;
+    }
+
+    public void setQuery_3_param_1(String query_3_param_1) {
+        this.query_3_param_1 = query_3_param_1;
+    }
+
+    public String getQuery_3_param_2() {
+        return query_3_param_2;
+    }
+
+    public void setQuery_3_param_2(String query_3_param_2) {
+        this.query_3_param_2 = query_3_param_2;
+    }
+
+    public void query_1_propertyChanged(ValueChangeEvent e) {
+        query_1_param_1 = e.getNewValue().toString();
+    }
+
+    public void query_3_instanceChanged(ValueChangeEvent e) {
+        query_3_param_1 = e.getNewValue().toString();
+    }
+
+    public void q_1_p_1Changed(AjaxBehaviorEvent event) {
+        String queryString = null;
+        String inst = null;
+        instanceMap.clear();
+        queryString = NAMESPACES
+                + "SELECT ?termine "
+                + "WHERE { ?termine a owl:Thing . ?termine ?property ?value . ?property rdf:type owl:"
+                + query_1_param_1 + " . } " + "ORDER BY ?termine";
+        Query query = QueryFactory.create(queryString);
+        QueryExecution qe = QueryExecutionFactory.create(query,
+                plotinoModel.getModel());
+        for (ResultSet rs = qe.execSelect(); rs.hasNext();) {
+            QuerySolution binding = rs.nextSolution();
+            inst = binding.get("termine").toString().split("#")[1];
+            instanceMap.put(inst, inst);
+        }
+        qe.close();
+    }
+
+    public void q_3_p_1Changed(AjaxBehaviorEvent event) {
+        String queryString = null;
+        String elem = null;
+        objRelationMap.clear();
+        queryString = NAMESPACES
+                + "SELECT DISTINCT ?property "
+                + "WHERE { "
+                + "{ plotino:"
+                + query_3_param_1
+                + " ?property ?v1 . ?property rdf:type owl:ObjectProperty . } "
+                + "UNION "
+                + "{ ?v2 ?property plotino:"
+                + query_3_param_1
+                + " . ?property rdf:type owl:ObjectProperty . } "
+                + "} "
+                + "ORDER BY ?property";
+        Query query = QueryFactory.create(queryString);
+        QueryExecution qe = QueryExecutionFactory.create(query,
+                plotinoModel.getModel());
+        for (ResultSet rs = qe.execSelect(); rs.hasNext();) {
+            QuerySolution binding = rs.nextSolution();
+            elem = binding.get("property").toString().split("#")[1];
+            objRelationMap.put(elem, elem);
+        }
+        qe.close();
+    }
+
+    public Map<String, String> getInstances() {
+        return instanceMap;
+    }
+
+    public Map<String, String> getInstances_2() {
+        return instance_2Map;
+    }
+
+    public Map<String, String> getObjRelations() {
+        return objRelationMap;
+    }
+
+    // esegue una query_1 dato un modello
+    private void executeQuery_1(String queryString, String modelType, String termScope, String relType) {
+        OntModel model = modelType.equals("model") ? plotinoModel.getModel() : plotinoModel.getClearModel();
+        Query query = QueryFactory.create(queryString);
+        QueryExecution qe = QueryExecutionFactory.create(query, model);
+        for (ResultSet rs = qe.execSelect(); rs.hasNext();) {
+            QuerySolution binding = rs.nextSolution();
+            String prop = binding.get("property").toString().split("#")[1];
+            String term = binding.get("termine").toString();
+            OntoResult ontoRes = new OntoResult();
+            ontoRes.setRelazione(prop);
+            if (termScope.equals("source")) {
+                ontoRes.setTermine(query_1_param_2);
+                ontoRes.setTermine_target(relType.equals("obj") ? term.split("#")[1] : term);
+            } else {
+                ontoRes.setTermine(term.split("#")[1]);
+                ontoRes.setTermine_target(query_1_param_2);
+            }
+            if (modelType.equals("model")) {
+                res.add(ontoRes);
+            } else {
+                clearRes.add(ontoRes);
+            }
+        }
+        qe.close();
+    }
+
+    // esegue una query_1 dato un modello
+    private void executeQuery_3(String queryString, String modelType) {
+        OntModel model = modelType.equals("model") ? plotinoModel.getModel() : plotinoModel.getClearModel();
+        Query query = QueryFactory.create(queryString);
+        QueryExecution qe = QueryExecutionFactory.create(query, model);
+        for (ResultSet rs = qe.execSelect(); rs.hasNext();) {
+            QuerySolution binding = rs.nextSolution();
+            String term = binding.get("termine").toString().split("#")[1];
+            OntoResult ontoRes = new OntoResult();
+            ontoRes.setTermine(query_3_param_1);
+            ontoRes.setRelazione(query_3_param_2);
+            ontoRes.setTermine_target(term);
+            if (modelType.equals("model")) {
+                res.add(ontoRes);
+            } else {
+                clearRes.add(ontoRes);
+            }
+        }
+        qe.close();
+    }
+
+    private boolean inferred(OntoResult e, int queryType) {
+        switch (queryType) {
+            case 1:
+                for (OntoResult or : clearRes) {
+                    if ((or.getTermine().equals(e.getTermine())) && ((or.getTermine_target().equals(e.getTermine_target())))
+                            && ((or.getRelazione().equals(e.getRelazione())))) {
+                        return false;
+                    }
+                }
+                break;
+            case 3:
+                for (OntoResult or : clearRes) {
+                    if (or.getTermine_target().equals(e.getTermine_target())) {
+                        return false;
+                    }
+                }
+                break;
+        }
+        return true;
+    }
+
+    public void runQuestion_1() throws IOException {
+        res.clear();
+        clearRes.clear();
+        columns.clear();
+        if (query_1_param_1.equals("ObjectProperty")) {
+
+            // query in cui l'istanza selezionata è SOURCE delle relazioni
+            String queryString = NAMESPACES
+                    + "SELECT DISTINCT ?property ?termine "
+                    + "WHERE { plotino:"
+                    + query_1_param_2
+                    + " ?property ?termine . ?property rdf:type owl:"
+                    + query_1_param_1
+                    + " . } ORDER BY ?termine ?property ";
+
+            // query al modello 
+            executeQuery_1(queryString, "model", "source", "obj");
+
+            // query al modello esplicito
+            executeQuery_1(queryString, "explicit", "source", "obj");
+
+            // query in cui l'istanza selezionata è TARGET delle relazioni
+            queryString = NAMESPACES
+                    + "SELECT DISTINCT ?property ?termine "
+                    + "WHERE { ?termine ?property plotino:"
+                    + query_1_param_2
+                    + " . ?property rdf:type owl:"
+                    + query_1_param_1
+                    + " . } ORDER BY ?termine ?property ";
+
+            // query al modello 
+            executeQuery_1(queryString, "model", "target", "obj");
+
+            // query al modello esplicito
+            executeQuery_1(queryString, "explicit", "target", "obj");
+
+            // verifica quali sono le triple inferite
+            for (OntoResult e : res) {
+                if (inferred(e, 1)) {
+                    e.setInferita("yes");
+                }
+            }
+
+            createDynamicColumns(columnTemplate_1_relazione);
+
+        } else {
+
+            String queryString = NAMESPACES
+                    + "SELECT DISTINCT ?property ?termine "
+                    + "WHERE { plotino:"
+                    + query_1_param_2
+                    + " ?property ?termine . ?property rdf:type owl:"
+                    + query_1_param_1 + " . }" + "ORDER BY ?property ";
+
+            // query al modello 
+            executeQuery_1(queryString, "model", "source", "data");
+
+            // query al modello esplicito
+            executeQuery_1(queryString, "explicit", "source", "data");
+
+            // verifica quali sono le triple inferite
+            for (OntoResult e : res) {
+                if (inferred(e ,1)) {
+                    e.setInferita("yes");
+                }
+            }
+            createDynamicColumns(columnTemplate_1_tratto);
+        }
+    }
+
+    public void runQuestion_3() throws IOException {
+        res.clear();
+        clearRes.clear();
+        columns.clear();
+        String queryString = NAMESPACES
+                + "SELECT DISTINCT ?termine "
+                + "WHERE { plotino:"
+                + query_3_param_1
+                + " plotino:"
+                + query_3_param_2
+                + " ?termine . } " + "ORDER BY ?termine ";
+
+        // query al modello 
+        executeQuery_3(queryString, "model");
+
+        // query al modello esplicito
+        executeQuery_3(queryString, "explicit");
+
+        queryString = NAMESPACES
+                + "SELECT DISTINCT ?termine "
+                + "WHERE { ?termine plotino:"
+                + query_3_param_2
+                + " plotino:"
+                + query_3_param_1
+                + " . } "
+                + "ORDER BY ?termine ";
+
+        // query al modello 
+        executeQuery_3(queryString, "model");
+
+        // query al modello esplicito
+        executeQuery_3(queryString, "explicit");
+
+        // setta le triple inferite
+        for (OntoResult e : res) {
+            if (inferred(e, 3)) {
+                e.setInferita("yes");
+            }
+        }
+        createDynamicColumns(columnTemplate_3);
+
+    }
+
+    public List<OntoResult> getResults() {
+        return res;
+    }
+}

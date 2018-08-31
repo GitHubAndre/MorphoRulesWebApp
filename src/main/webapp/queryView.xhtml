@@ -1,0 +1,62 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:form id="lexiconCreationFormDetailForm">
+
+        <h:panelGrid id="queryGrid" columns="1" columnClasses="column" cellpadding="5" >
+            <h:panelGrid columns="2" cellpadding="10">
+                <h:outputLabel value="Create your SPARQL query or pick up your question" style="font-size: 20px; font-weight: bold;"/>
+                <p:selectOneMenu id="questions" styleClass="menu" panelStyleClass="panel" value="#{editorController.currentQueryItemValue}">
+                    <f:selectItem itemLabel="Select one" itemValue="" />
+                    <f:selectItem itemLabel="List written representation for the first 50 entries" itemValue="q1" />
+                    <f:selectItem itemLabel="List written representation for all the nouns" itemValue="q2" />
+                    <f:selectItem itemLabel="Find the terms used in Plato with their translations" itemValue="q3" />
+                    <f:selectItem itemLabel="Count number of entries" itemValue="q4" />
+                    <p:ajax event="valueChange" listener="#{editorController.questionChanged}" update="sparlqEditor"/>
+                </p:selectOneMenu>
+            </h:panelGrid>
+
+            <h:panelGrid columns="1" cellspacing="5" style="padding-top: 5px;">
+                <h:inputTextarea id="sparlqEditor" rows="15" cols="80" value="#{editorController.query}"/>
+                <h:panelGrid columns="2" cellspacing="5" style="padding-top: 5px;">
+                    <p:commandButton value="Submit" action="#{editorController.execQuery()}" update="resultTable systemMessage"
+                                     onstart="PF('loadingDialog').show()" oncomplete="PF('loadingDialog').hide()"/>
+                    <p:commandButton value="Clear" action="#{editorController.clearQuery()}" update="sparlqEditor questions resultTable"/>
+                </h:panelGrid>
+            </h:panelGrid>
+        </h:panelGrid>
+
+        <h:panelGrid id="resultTable" columns="1" columnClasses="column" cellpadding="5">
+            
+            <h:panelGrid columns="4" columnClasses="column" cellpadding="5">
+                <h:outputLabel value="Result" style="font-size: 20px; font-weight: bold;"/>
+                <h:commandLink rendered="#{editorController.resultTable.size() != 0}">
+                    <p:graphicImage name="image/csv.png" />
+                    <p:fileDownload value="#{editorController.csv}" />
+                </h:commandLink>
+            </h:panelGrid>
+
+            <p:dataTable id="dataTable" styleClass="colHeader" var="res"
+                         value="#{editorController.resultTable}" style="width:80%" paginator="true"
+                         rows="5" rowsPerPageTemplate="5, 10, 50, 100, 500"
+                         paginatorTemplate=" {CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rendered="#{editorController.resultTable.size() != 0}">
+
+                <p:columns styleClass="colHeader" value="#{editorController.columns}"
+                           var="column" columnIndexVar="colIndex">
+                    <f:facet name="header">  
+                        #{column.header}  
+                    </f:facet>    
+                    #{res.row.get(column.header)}  
+                </p:columns>
+            </p:dataTable>
+
+
+        </h:panelGrid>
+
+    </h:form>
+
+</ui:composition>
